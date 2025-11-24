@@ -1,0 +1,36 @@
+@import 'tailwindcss';
+
+@theme {
+    --color-cream: #f1e8d2;
+    --color-beige: #d6c3a5;
+    --color-yellow: #F9D949;
+    --color-orange: #F8A13F;
+    --color-coral: #F57751;
+    --color-red: #E94653;
+    --color-magenta: #D94780;
+    --color-purple: #8B4789;
+    --color-dark: #3A3A3A;
+}
+
+
+
+.stripes {
+  background: linear-gradient(
+  135deg,
+  #F9D949 0%,
+  #F9D949 14.28%,
+  #F8A13F 14.28%,
+  #F8A13F 28.56%,
+  #F57751 28.56%,
+  #F57751 42.84%,
+  #E94653 42.84%,
+  #E94653 57.12%,
+  #D94780 57.12%,
+  #D94780 71.4%,
+  #8B4789 71.4%,
+  #8B4789 85.68%,
+  #3A3A3A 85.68%
+    );
+
+  animation: shift 20s linear infinite;
+}
