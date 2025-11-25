@@ -1,38 +1,82 @@
 <script>
-	// @ts-nocheck
 	import { onMount } from 'svelte';
 
-	let editor = $state(null)
+	let editor = $state(null);
+	let playing = $state(false);
+	let timeToUpdate = $state(67);
+	let history = $state([]);
+	let vibe = $state('');
+
+	async function generateNext() {
+		let savedVibe = vibe
+
+		const res = await fetch('/api/generate', {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({
+				vibe: vibe,
+				history: history,
+			})
+		});
+		console.log("got response!")
+
+		
+
+		let data = await res.json()
+
+		history.push({
+			vibe: savedVibe,
+			code: data.code
+		})
+
+		// play the code with strudel
+		updateStrudel(data.code);
+	}
+
+	function updateStrudel(code) {
+		editor.setCode(code)
+
+		editor.evaluate()
+	}
 
 	onMount(async () => {
 		// import only on client
 		await import('@strudel/repl');
 
 		const repl = document.createElement('strudel-editor');
+
 		repl.setAttribute(
 			'code',
-			`setcps(1)
-n("<0 1 2 3 4>*8").scale('G4 minor')
-.s("gm_lead_6_voice")
-.clip(sine.range(.2,.8).slow(8))
-.jux(rev)
-.room(2)
-.sometimes(add(note("12")))
-.lpf(perlin.range(200,20000).slow(4))`
+			``
 		);
 		document.getElementById('strudel').append(repl);
 		editor = repl.editor;
 	});
 
+	function play() {
+		playing = true;
+
+		editor.evaluate();
+	}
+
 	$inspect(editor);
 </script>
 
-<div class="w-screen h-screen bg-cream flex items-center justify-center gap-10">
-	<div class="bg-cream border border-beige p-8 text-center rounded-2xl">
-		<button
-			class=""
-			onclick={() => { editor.evaluate(); editor.play() } }
-		>play</button>
-	</div>
-	<div id="strudel" class="rounded-xl border border-beige"></div>
+<div class="w-screen h-screen bg-cream flex text-dark items-center justify-center gap-10">
+	{#if playing}
+		<div class="bg-cream border border-beige p-8 text-center rounded-2xl flex flex-col gap-4">
+			<button class="rounded-2xl p-4 px-6 bg-beige" onclick={generateNext}>update now (next in {timeToUpdate}s)</button>
+			<input
+				class="rounded-2xl w-full p-3 border border-beige"
+				placeholder="enter a vibe..."
+				bind:value={vibe}
+			/>
+		</div>
+	{:else}
+		<button class="bg-cream border border-beige p-4 px-6 text-center rounded-2xl" onclick={play}
+			>play</button
+		>
+	{/if}
+
+	<div id="strudel" class="rounded-xl border border-beige hidden"></div>
 </div>
